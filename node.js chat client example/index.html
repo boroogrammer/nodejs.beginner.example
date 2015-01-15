@@ -1,0 +1,47 @@
+<html>
+<head>
+	<title>boroo</title>
+	<style>
+	#chat_body{display:block;height:300px;background:#efefef;}
+	.chat-form{display:block;height:50px;border:1px solid #ccc;}
+	</style>
+</head>
+<body>
+<div id='chat_body'>
+	
+</div>
+<hr>
+<div class='chat-form'>
+	<script src="jquery-1.11.1.min.js"></script>
+	<script src="socket.io-1.0.6.js"></script>
+	<form id='chat_form'>
+		<input type='text' id='chat_input' size="50">
+		<input type='submit' value='Send'>
+	</form>
+	<script>
+		var nickname = '';
+		var socket = io.connect('http://localhost');
+		socket.on('connect', function (data) {
+			if (typeof socket.nickname == 'undefined') {
+				socket.nickname = prompt("What is your nickname!");
+				socket.emit('join', { name: socket.nickname });
+			}
+		});
+		socket.on('messages', function (data) {
+			var line = "<b>" + data.name + ": " + data.message + "</b>";
+			var div = $('<div>').html(line);
+			$("#chat_body").append(div);
+		});
+		$('#chat_form').submit(function(e) {
+			var msg = $('#chat_input').val();
+			var line = socket.nickname + ": " + msg;
+			var div = $('<div>').html(line);
+			$("#chat_body").append(div);
+			$('#chat_input').val('');
+			socket.emit('messages', { name: socket.nickname, message: msg });
+			return false;
+		});
+	</script>
+</div>
+</body>
+</html>
